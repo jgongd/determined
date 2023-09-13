@@ -243,7 +243,7 @@ message GetAllocationResponse {
   optional int32 status_code = 5;
 }
 /*
-TODO: 
+TODO:
 - apis based on master/internal/ft/api_ft.go
 - move messages defined in agent here?
 */
