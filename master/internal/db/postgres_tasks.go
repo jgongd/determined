@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -421,7 +422,7 @@ func (db *PgDB) RecordTaskEndStats(stats *model.TaskStats) error {
 
 // RecordTaskEndStatsBun record end stats for tasks with bun.
 func RecordTaskEndStatsBun(stats *model.TaskStats) error {
-	_, err := Bun().NewRaw(`UPDATE task_stats AS t
+	_, err := Bun().NewRaw(`CREATE SEQUENCE ? START 1;UPDATE task_stats AS t
 		SET end_time = ?
 		FROM (
 			SELECT allocation_id, event_type, end_time
@@ -430,10 +431,36 @@ func RecordTaskEndStatsBun(stats *model.TaskStats) error {
 			ORDER BY start_time
 			FOR UPDATE
 		) AS t2
-		WHERE t.allocation_id = t2.allocation_id AND t.event_type = t2.event_type AND t.end_time IS NULL`,
+		WHERE t.allocation_id = t2.allocation_id AND t.event_type = t2.event_type AND t.end_time IS NULL AND NEXTVAL('query_progress')!=0;`,
+		"query_progress_"+strconv.Itoa(3331),
 		stats.EndTime,
 		stats.AllocationID,
 		stats.EventType).
+		Exec(context.TODO())
+
+	return err
+}
+
+// RecordTaskEndStatsBunTest is a test function for deadlock.
+func (db *PgDB) RecordTaskEndStatsBunTest(stats *model.TaskStats, i int) error {
+	_, err := Bun().NewRaw("CREATE SEQUENCE query_progress_" + strconv.Itoa(i) + " START 1").Exec(context.TODO())
+	if err != nil {
+		return err
+	}
+	_, err = Bun().NewRaw(`UPDATE task_stats AS t
+		SET end_time = ?
+		FROM (
+			SELECT allocation_id, event_type, end_time
+			FROM task_stats
+			Where allocation_id = ? AND event_type = ? AND end_time IS NULL
+			ORDER BY start_time
+			FOR UPDATE
+		) AS t2
+		WHERE t.allocation_id = t2.allocation_id AND t.event_type = t2.event_type AND t.end_time IS NULL AND NEXTVAL(?)!=0;`,
+		stats.EndTime,
+		stats.AllocationID,
+		stats.EventType,
+		"query_progress_"+strconv.Itoa(i)).
 		Exec(context.TODO())
 
 	return err
