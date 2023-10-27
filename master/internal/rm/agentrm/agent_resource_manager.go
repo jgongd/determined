@@ -71,7 +71,7 @@ func (a ResourceManager) ValidateResourcePool(name string) error {
 }
 
 // CheckMaxSlotsExceeded checks if the job exceeded the maximum number of slots.
-func (a ResourceManager) CheckMaxSlotsExceeded(v *sproto.ValidateResourcePoolAvailabilityParam) (bool, error) {
+func (a ResourceManager) CheckMaxSlotsExceeded(v *sproto.ValidateResourcePoolAvailabilityRequest) (bool, error) {
 	ref, err := a.getResourcePoolRef(v.Name)
 	if err != nil {
 		return false, err
@@ -166,7 +166,7 @@ func (a ResourceManager) ValidateResources(name string, slots int, command bool)
 }
 
 // ValidateResourcePoolAvailability is a default implementation to satisfy the interface.
-func (a ResourceManager) ValidateResourcePoolAvailability(v *sproto.ValidateResourcePoolAvailabilityParam) (
+func (a ResourceManager) ValidateResourcePoolAvailability(v *sproto.ValidateResourcePoolAvailabilityRequest) (
 	[]command.LaunchWarning,
 	error,
 ) {
