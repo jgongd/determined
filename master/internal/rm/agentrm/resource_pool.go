@@ -476,38 +476,44 @@ func (rp *resourcePool) Receive(ctx *actor.Context) error {
 		reschedule = false
 		var totalSlots int
 
-		disallowedNodes := set.New[string]()
+		blockedNodeSet := set.New[string]()
 		if msg.TaskID != nil {
-			disallowedNodes = *logpattern.DisallowedNodes(*msg.TaskID)
+			blockedNodes, err := logpattern.GetBlockedNodes(context.TODO(), *msg.TaskID)
+			if err != nil {
+				panic(err.Error())
+			}
+			blockedNodeSet = set.FromSlice(blockedNodes)
 		}
 		rp.agentStatesCache = rp.fetchAgentStates(ctx)
+		defer func() {
+			rp.agentStatesCache = nil
+		}()
 
 		switch {
 		case rp.config.Provider == nil:
-
-			defer func() {
-				rp.agentStatesCache = nil
-			}()
-
-			// check task speicifc slots here
 			for _, a := range rp.agentStatesCache {
-				if !disallowedNodes.Contains(a.Handler.Address().Local()) {
+				if !blockedNodeSet.Contains(a.Handler.Address().Local()) {
 					totalSlots += len(a.slotStates)
 				}
 			}
 		case rp.config.Provider.AWS != nil:
+			fmt.Printf("max instances: %v\n", rp.config.Provider.MaxInstances)
 			totalSlots = rp.config.Provider.MaxInstances * rp.config.Provider.AWS.SlotsPerInstance()
 
+			fmt.Printf("blockedNodeSet: %+v\n", blockedNodeSet)
 			for _, a := range rp.agentStatesCache {
-				if disallowedNodes.Contains(a.Handler.Address().Local()) {
+				if blockedNodeSet.Contains(a.Handler.Address().Local()) {
+					fmt.Printf("handler: %+v\n", a.Handler.Address().Local())
 					totalSlots -= len(a.slotStates)
 				}
 			}
+			fmt.Printf("totalSlots: %+v\n", totalSlots)
+			fmt.Println(" ")
 		case rp.config.Provider.GCP != nil:
 			totalSlots = rp.config.Provider.MaxInstances * rp.config.Provider.GCP.SlotsPerInstance()
 
 			for _, a := range rp.agentStatesCache {
-				if disallowedNodes.Contains(a.Handler.Address().Local()) {
+				if blockedNodeSet.Contains(a.Handler.Address().Local()) {
 					totalSlots -= len(a.slotStates)
 				}
 			}
