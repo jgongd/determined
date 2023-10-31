@@ -480,7 +480,8 @@ func (rp *resourcePool) Receive(ctx *actor.Context) error {
 		if msg.TaskID != nil {
 			blockedNodes, err := logpattern.GetBlockedNodes(context.TODO(), *msg.TaskID)
 			if err != nil {
-				panic(err.Error())
+				ctx.Respond(err)
+				return nil
 			}
 			blockedNodeSet = set.FromSlice(blockedNodes)
 		}
