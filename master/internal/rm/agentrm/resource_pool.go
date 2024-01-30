@@ -476,6 +476,7 @@ func (rp *resourcePool) allocateResources(req *sproto.AllocateRequest) bool {
 		ResourcePool:      rp.config.PoolName,
 		Resources:         sprotoResources,
 		JobSubmissionTime: req.JobSubmissionTime,
+		RequestTime:       req.RequestTime,
 	}
 	rp.taskList.AddAllocation(req.AllocationID, &allocated)
 	rmevents.Publish(req.AllocationID, allocated.Clone())

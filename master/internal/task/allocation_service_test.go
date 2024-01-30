@@ -660,6 +660,7 @@ func requireAssignedMany(
 		ID:           id,
 		ResourcePool: stubResourcePoolName,
 		Resources:    assigned,
+		RequestTime:  time.Now().UTC(),
 	})
 	requireState(t, db, id, model.AllocationStateAssigned)
 	return resources
