@@ -220,8 +220,8 @@ func (p *Publisher[T]) Broadcast(events []Event[T], idToSaturatedMsg map[int]*Up
 	for sub := range p.Subscriptions {
 		userNotKnownIDs := set.New[int]()
 		func() {
-			for _, ev := range events {
-				// fmt.Printf("events idx: %v\n", i)
+			for i, ev := range events {
+				fmt.Printf("events idx: %v\n", i)
 				var msg interface{}
 				switch {
 				case !reflect.ValueOf(ev.After).IsNil() && sub.filter(ev.After) && sub.permissionFilter(ev.After):
