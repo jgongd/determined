@@ -60,6 +60,7 @@ func NewSubscriptionSet(
 				ps.Projects,
 				newPermFilter(ctx, user, ProjectMakePermissionFilter, &err),
 				newFilter(spec.Projects, ProjectMakeFilter, &err),
+				ProjectHydrateUpsertMsg(),
 			),
 			ProjectCollectStartupMsgs,
 		}
