@@ -255,8 +255,8 @@ func (p *Publisher[T]) Broadcast(events []Event[T], idToSaturatedMsg map[int]*Up
 						continue
 					}
 				default:
-					fmt.Printf("it's a malformed message %v\n", ev)
-					log.Debugf("unable to this event %v\n", ev)
+					fmt.Printf("This message is not relavent to the subscriber. Ignore it.\n")
+					log.Tracef("This message is not relavent to the subscriber. Ignore it.\n")
 					continue
 				}
 				// is this the first match for this Subscription during this Broadcast?
