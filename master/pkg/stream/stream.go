@@ -3,7 +3,6 @@ package stream
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"reflect"
 	"sync"
 
@@ -41,7 +40,6 @@ type UpsertMsg struct {
 
 // MarshalJSON returns a json marshaled UpsertMsg.
 func (u UpsertMsg) MarshalJSON() ([]byte, error) {
-	fmt.Printf("msg: %+v\n", u.Msg)
 	data := map[string]Msg{
 		u.JSONKey: u.Msg,
 	}
@@ -177,7 +175,7 @@ func (p *Publisher[T]) CloseAllStreamers() {
 	p.Lock.Lock()
 	defer p.Lock.Unlock()
 	seenStreamersSet := make(map[*Streamer]struct{})
-	for sub := range p.Subscriptions {
+	for _, sub := range p.Subscriptions {
 		if _, ok := seenStreamersSet[sub.Streamer]; !ok {
 			sub.Streamer.Close()
 			seenStreamersSet[sub.Streamer] = struct{}{}
@@ -220,9 +218,8 @@ func (p *Publisher[T]) Broadcast(events []Event[T], idToSaturatedMsg map[int]*Up
 	for sub := range p.Subscriptions {
 		userNotKnownIDs := set.New[int]()
 		func() {
-			for i, ev := range events {
-				fmt.Printf("events idx: %v\n", i)
-				var msg interface{}
+			for _, ev := range events {
+				var msg any
 				switch {
 				case !reflect.ValueOf(ev.After).IsNil() && sub.filter(ev.After) && sub.permissionFilter(ev.After):
 					// update, insert, or fallin: send the record to the client.
@@ -255,7 +252,6 @@ func (p *Publisher[T]) Broadcast(events []Event[T], idToSaturatedMsg map[int]*Up
 						continue
 					}
 				default:
-					fmt.Printf("This message is not relavent to the subscriber. Ignore it.\n")
 					log.Tracef("This message is not relavent to the subscriber. Ignore it.\n")
 					continue
 				}

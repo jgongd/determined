@@ -10,7 +10,6 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/uptrace/bun"
-	"github.com/uptrace/bun/extra/bundebug"
 
 	"github.com/determined-ai/determined/master/internal/db"
 	"github.com/determined-ai/determined/master/pkg/model"
@@ -55,7 +54,7 @@ type ProjectMsg struct {
 }
 
 // SeqNum gets the SeqNum from a ProjectMsg.
-func (pm ProjectMsg) SeqNum() int64 {
+func (pm *ProjectMsg) SeqNum() int64 {
 	return pm.Seq
 }
 
@@ -68,8 +67,7 @@ func (pm *ProjectMsg) GetID() int {
 func (pm *ProjectMsg) UpsertMsg() *stream.UpsertMsg {
 	return &stream.UpsertMsg{
 		JSONKey: ProjectsUpsertKey,
-		// This has to be & because project filter and permission filter need *ProjectMsg
-		Msg: &pm,
+		Msg:     pm,
 	}
 }
 
@@ -160,8 +158,11 @@ func ProjectCollectStartupMsgs(
 	if err != nil {
 		return nil, fmt.Errorf("processing known: %w", err)
 	}
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7c80155478 (table tests)
 	// step 2: hydrate appeared IDs into full ProjectMsgs
-	db.Bun().AddQueryHook(bundebug.NewQueryHook(bundebug.WithVerbose(true)))
 	var projMsgs []*ProjectMsg
 	if len(appeared) > 0 {
 		query := db.Bun().NewSelect().Model(&projMsgs).Where("project_msg.id in (?)", bun.In(appeared))
@@ -174,7 +175,6 @@ func ProjectCollectStartupMsgs(
 			return nil, err
 		}
 	}
-	db.Bun().AddQueryHook(bundebug.NewQueryHook(bundebug.WithEnabled(false)))
 
 	// step 3: emit deletions and updates to the client
 	out = append(out, &stream.DeleteMsg{
@@ -182,8 +182,7 @@ func ProjectCollectStartupMsgs(
 		Deleted: missing,
 	})
 	for _, msg := range projMsgs {
-		upsertMsg := msg.UpsertMsg()
-		out = append(out, upsertMsg)
+		out = append(out, msg.UpsertMsg())
 	}
 	return out, nil
 }

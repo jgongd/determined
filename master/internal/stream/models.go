@@ -60,11 +60,6 @@ func (mm *ModelMsg) GetID() int {
 	return mm.ID
 }
 
-// GetID gets the ID from a ModelMsg.
-func (pm *ModelMsg) GetID() int {
-	return pm.ID
-}
-
 // UpsertMsg creates a model stream upsert message.
 func (mm *ModelMsg) UpsertMsg() *stream.UpsertMsg {
 	return &stream.UpsertMsg{
