@@ -219,7 +219,7 @@ func (p *Publisher[T]) Broadcast(events []Event[T], idToSaturatedMsg map[int]*Up
 		userNotKnownIDs := set.New[int]()
 		func() {
 			for _, ev := range events {
-				var msg any
+				var msg interface{}
 				switch {
 				case !reflect.ValueOf(ev.After).IsNil() && sub.filter(ev.After) && sub.permissionFilter(ev.After):
 					// update, insert, or fallin: send the record to the client.
@@ -252,7 +252,7 @@ func (p *Publisher[T]) Broadcast(events []Event[T], idToSaturatedMsg map[int]*Up
 						continue
 					}
 				default:
-					log.Tracef("This message is not relavent to the subscriber. Ignore it.\n")
+					// ignore this message
 					continue
 				}
 				// is this the first match for this Subscription during this Broadcast?
