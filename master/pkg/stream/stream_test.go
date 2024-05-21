@@ -1,7 +1,12 @@
 package stream
 
 import (
+<<<<<<< HEAD
 	"database/sql"
+=======
+	"fmt"
+	"slices"
+>>>>>>> 2a86cd59f6 (Handle insert and fallin)
 	"strconv"
 	"testing"
 
@@ -595,6 +600,7 @@ func setup(t *testing.T, testEvents []TestEvent, testSubscribers []TestSubscribe
 			userToFallinSeq[ts.ID] = int64(-1)
 		}
 	}
+	fmt.Printf("seqs: %+v\n", seqs)
 
 	var hydrator func(*TestMsgTypeA) (*TestMsgTypeA, error)
 	if testEvents[len(testEvents)-1].Type != MsgDeleteType {
@@ -904,6 +910,7 @@ func TestTwoSubscribers(t *testing.T) {
 				{Type: MsgUpdateType, FalloutUserID: []int{2}, AfterSeq: 2},
 			},
 			outGoingMsgs: []interface{}{
+
 				DeleteMsg{Deleted: "0"},
 				DeleteMsg{Deleted: "0"},
 			},

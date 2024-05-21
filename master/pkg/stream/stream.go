@@ -3,6 +3,7 @@ package stream
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"sync"
 
@@ -218,7 +219,7 @@ func (p *Publisher[T]) Broadcast(events []Event[T], idToSaturatedMsg map[int]*Up
 	for sub := range p.Subscriptions {
 		userNotKnownIDs := set.New[int]()
 		func() {
-			for _, ev := range events {
+			for i, ev := range events {
 				var msg interface{}
 				switch {
 				case !reflect.ValueOf(ev.After).IsNil() && sub.filter(ev.After) && sub.permissionFilter(ev.After):
@@ -253,6 +254,7 @@ func (p *Publisher[T]) Broadcast(events []Event[T], idToSaturatedMsg map[int]*Up
 					}
 				default:
 					// ignore this message
+					fmt.Println("ignore")
 					continue
 				}
 				// is this the first match for this Subscription during this Broadcast?
