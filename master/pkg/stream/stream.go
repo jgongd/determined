@@ -117,8 +117,6 @@ type Subscription[T Msg] struct {
 	permissionFilter func(T) bool
 	// wakeupID prevent duplicate wakeups if multiple events in a single Broadcast are relevant
 	wakeupID int64
-	// Hydrate an UpsertMsg.
-	hydrator func(int) (T, error)
 }
 
 // NewSubscription creates a new Subscription to messages of type T.
@@ -127,14 +125,12 @@ func NewSubscription[T Msg](
 	publisher *Publisher[T],
 	permFilter func(T) bool,
 	filterFn func(T) bool,
-	hydrator func(int) (T, error),
 ) Subscription[T] {
 	return Subscription[T]{
 		Streamer:         streamer,
 		Publisher:        publisher,
 		permissionFilter: permFilter,
 		filter:           filterFn,
-		hydrator:         hydrator,
 	}
 }
 
@@ -176,7 +172,7 @@ func (p *Publisher[T]) CloseAllStreamers() {
 	p.Lock.Lock()
 	defer p.Lock.Unlock()
 	seenStreamersSet := make(map[*Streamer]struct{})
-	for _, sub := range p.Subscriptions {
+	for sub := range p.Subscriptions {
 		if _, ok := seenStreamersSet[sub.Streamer]; !ok {
 			sub.Streamer.Close()
 			seenStreamersSet[sub.Streamer] = struct{}{}
@@ -219,7 +215,7 @@ func (p *Publisher[T]) Broadcast(events []Event[T], idToSaturatedMsg map[int]*Up
 	for sub := range p.Subscriptions {
 		userNotKnownIDs := set.New[int]()
 		func() {
-			for i, ev := range events {
+			for _, ev := range events {
 				var msg interface{}
 				switch {
 				case !reflect.ValueOf(ev.After).IsNil() && sub.filter(ev.After) && sub.permissionFilter(ev.After):

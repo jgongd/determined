@@ -70,17 +70,17 @@ func (em *ExperimentMsg) GetID() int {
 }
 
 // UpsertMsg creates a Experiment stream upsert message.
-func (em *ExperimentMsg) UpsertMsg() stream.UpsertMsg {
-	return stream.UpsertMsg{
+func (em *ExperimentMsg) UpsertMsg() *stream.UpsertMsg {
+	return &stream.UpsertMsg{
 		JSONKey: ExperimentUpsertKey,
 		Msg:     em,
 	}
 }
 
 // DeleteMsg creates a Experiment stream delete message.
-func (em *ExperimentMsg) DeleteMsg() stream.DeleteMsg {
+func (em *ExperimentMsg) DeleteMsg() *stream.DeleteMsg {
 	deleted := strconv.FormatInt(int64(em.ID), 10)
-	return stream.DeleteMsg{
+	return &stream.DeleteMsg{
 		Key:     ExperimentsDeleteKey,
 		Deleted: deleted,
 	}
@@ -253,15 +253,17 @@ func ExperimentMakePermissionFilter(ctx context.Context, user model.User) (func(
 
 // ExperimentMakeHydrator returns a function that gets properties of a experiment by
 // its id.
-func ExperimentMakeHydrator() func(int) (*ExperimentMsg, error) {
-	return func(ID int) (*ExperimentMsg, error) {
-		var expMsg ExperimentMsg
-		query := db.Bun().NewSelect().Model(&expMsg).Where("id = ?", ID)
-		err := query.Scan(context.Background(), &expMsg)
-		if err != nil && errors.Cause(err) != sql.ErrNoRows {
-			log.Errorf("error in experiment hydrator: %v\n", err)
+func ExperimentMakeHydrator() func(*ExperimentMsg) (*ExperimentMsg, error) {
+	return func(msg *ExperimentMsg) (*ExperimentMsg, error) {
+		var saturatedMsg ExperimentMsg
+		query := db.Bun().NewSelect().Model(&saturatedMsg).Where("id = ?", msg.GetID()).ExcludeColumn("workspace_id")
+		err := query.Scan(context.Background(), &saturatedMsg)
+		if err != nil && errors.Is(err, sql.ErrNoRows) {
 			return nil, err
+		} else if err != nil {
+			return nil, fmt.Errorf("error in experiment hydrator: %w", err)
 		}
-		return &expMsg, nil
+		saturatedMsg.WorkspaceID = msg.WorkspaceID
+		return &saturatedMsg, nil
 	}
 }

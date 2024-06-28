@@ -158,10 +158,7 @@ func ProjectCollectStartupMsgs(
 	if err != nil {
 		return nil, fmt.Errorf("processing known: %w", err)
 	}
-<<<<<<< HEAD
-=======
 
->>>>>>> 7c80155478 (table tests)
 	// step 2: hydrate appeared IDs into full ProjectMsgs
 	var projMsgs []*ProjectMsg
 	if len(appeared) > 0 {
