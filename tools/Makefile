@@ -24,4 +24,4 @@ check:
 	isort . --check-only
 	black . --check
 	python -m flake8
-	mypy scripts
+	mypy --exclude site-packages scripts 

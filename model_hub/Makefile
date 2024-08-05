@@ -54,7 +54,7 @@ check:
 	isort . --check-only
 	black . --check
 	python -m flake8
-	mypy .
+	mypy --exclude site-packages .
 
 .PHONY: test
 test:

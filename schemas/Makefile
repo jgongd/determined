@@ -12,4 +12,4 @@ check:
 	isort . --check-only
 	black . --check
 	python -m flake8
-	mypy `find . -name '*.py'`
+	mypy --exclude site-packages `find . -name '*.py'`
