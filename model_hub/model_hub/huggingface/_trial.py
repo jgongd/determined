@@ -1,7 +1,7 @@
 import dataclasses
 import logging
 import warnings
-from typing import Any, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import datasets as hf_datasets
 import torch
@@ -173,7 +173,6 @@ def default_load_dataset(
             data_config.dataset_name, data_config.dataset_config_name
         )
         assert hasattr(datasets, "keys"), "Expected a dictionary of datasets."
-        datasets = cast(Union[hf_datasets.DatasetDict, hf_datasets.IterableDatasetDict], datasets)
 
         if "validation" not in datasets.keys():
             assert (

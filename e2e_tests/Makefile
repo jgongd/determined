@@ -15,7 +15,7 @@ check:
 		-s ./tests/fixtures/pytorch_amp/data.py
 	black . --check
 	python -m flake8
-	mypy -v tests
+	mypy tests
 
 test:
 	pytest -vv -s --durations=0 tests
