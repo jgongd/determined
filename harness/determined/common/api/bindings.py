@@ -10474,29 +10474,6 @@ class v1PatchWebhook(Printable):
         }
         return out
 
-class v1PatchWebhookResponse(Printable):
-    """Response to PatchWebhookRequest."""
-
-    def __init__(
-        self,
-        *,
-        webhook: "v1PatchWebhook",
-    ):
-        self.webhook = webhook
-
-    @classmethod
-    def from_json(cls, obj: Json) -> "v1PatchWebhookResponse":
-        kwargs: "typing.Dict[str, typing.Any]" = {
-            "webhook": v1PatchWebhook.from_json(obj["webhook"]),
-        }
-        return cls(**kwargs)
-
-    def to_json(self, omit_unset: bool = False) -> typing.Dict[str, typing.Any]:
-        out: "typing.Dict[str, typing.Any]" = {
-            "webhook": self.webhook.to_json(omit_unset),
-        }
-        return out
-
 class v1PatchWorkspace(Printable):
     """PatchWorkspace is a partial update to a workspace with all optional fields."""
     agentUserGroup: "typing.Optional[v1AgentUserGroup]" = None
@@ -22686,7 +22663,7 @@ def patch_PatchWebhook(
     *,
     body: "v1PatchWebhook",
     id: int,
-) -> "v1PatchWebhookResponse":
+) -> None:
     """Update a webhook.
 
     - body: The desired webhook fields and values to update.
@@ -22704,7 +22681,7 @@ def patch_PatchWebhook(
         stream=False,
     )
     if _resp.status_code == 200:
-        return v1PatchWebhookResponse.from_json(_resp.json())
+        return
     raise APIHttpError("patch_PatchWebhook", _resp)
 
 def patch_PatchWorkspace(

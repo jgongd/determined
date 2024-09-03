@@ -115,6 +115,26 @@ func (l *WebhookManager) removeTriggers(triggers []*Trigger) error {
 	return nil
 }
 
+func (l *WebhookManager) editTriggers(ts []*Trigger) error {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
+	for _, t := range ts {
+		if t.TriggerType != TriggerTypeTaskLog {
+			return nil
+		}
+
+		regex, ok := t.Condition[regexConditionKey].(string)
+		if !ok {
+			return fmt.Errorf(
+				"expected webhook trigger to have regex in condition instead got %v", t.Condition)
+		}
+
+		l.regexToTriggers[regex].triggerIDToTrigger[t.ID].Webhook.URL = t.Webhook.URL
+	}
+	return nil
+}
+
 func (l *WebhookManager) getWebhookConfig(ctx context.Context, expID *int) (*expconf.WebhooksConfigV0, error) {
 	if expID == nil {
 		return nil, nil
@@ -731,18 +751,47 @@ func (l *WebhookManager) updateWebhook(
 	webhookID int32,
 	p *webhookv1.PatchWebhook,
 ) error {
-	err := db.Bun().RunInTx(ctx, nil, func(ctx context.Context, tx bun.Tx) error {
+	fmt.Printf("\n before cache expToWebhookConfig: %#v\n", l.expToWebhookConfig)
+	fmt.Printf("before cache regexToTriggers: %#v\n", l.regexToTriggers)
+	for k, v := range l.regexToTriggers {
+		fmt.Printf("key: %v\n", k)
+		for k2, v2 := range v.triggerIDToTrigger {
+			fmt.Printf("  triggerid: %#v, webhook: %#v\n", k2, v2.Webhook)
+		}
+	}
+
+	var ts []*Trigger
+	err := db.Bun().NewSelect().Model(&ts).Relation("Webhook").
+		Where("webhook_id = ?", webhookID).
+		Scan(ctx, &ts)
+	if err != nil {
+		return fmt.Errorf("getting webhook triggers to update cache: %w", err)
+	}
+
+	err = db.Bun().RunInTx(ctx, nil, func(ctx context.Context, tx bun.Tx) error {
 		_, err := tx.NewUpdate().Table("webhooks").
 			Set("url = ?", p.Url).
 			Where("id = ?", webhookID).
 			Exec(ctx)
 		if err != nil {
-			return fmt.Errorf("error updating webhook %d: %w", webhookID, err)
+			return fmt.Errorf("updating webhook %d: %w", webhookID, err)
+		}
+
+		if err := l.editTriggers(ts); err != nil {
+			return err
 		}
 		return nil
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("updating webhook: %w", err)
+	}
+	fmt.Printf("\n after cache expToWebhookConfig: %#v\n", l.expToWebhookConfig)
+	fmt.Printf("after cache regexToTriggers: %#v\n", l.regexToTriggers)
+	for k, v := range l.regexToTriggers {
+		fmt.Printf("key: %v\n", k)
+		for k2, v2 := range v.triggerIDToTrigger {
+			fmt.Printf("  triggerid: %#v, webhook: %#v\n", k2, v2.Webhook)
+		}
 	}
 	return nil
 }

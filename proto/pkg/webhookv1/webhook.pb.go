@@ -364,6 +364,7 @@ func (x *Trigger) GetWebhookId() int32 {
 	return 0
 }
 
+// PatchWebhook is a partial update to a webhook
 type PatchWebhook struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache

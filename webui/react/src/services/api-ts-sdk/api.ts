@@ -7659,12 +7659,6 @@ export interface V1PatchWebhook {
  * @interface V1PatchWebhookResponse
  */
 export interface V1PatchWebhookResponse {
-    /**
-     * The updated webhook.
-     * @type {V1PatchWebhook}
-     * @memberof V1PatchWebhookResponse
-     */
-    webhook: V1PatchWebhook;
 }
 /**
  * PatchWorkspace is a partial update to a workspace with all optional fields.
