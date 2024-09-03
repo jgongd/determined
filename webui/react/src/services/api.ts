@@ -529,9 +529,11 @@ export const getWebhooks = generateDetApi<EmptyParams, Api.V1GetWebhooksResponse
   Config.getWebhooks,
 );
 
-export const patchWebhook = generateDetApi<Service.PatchWebhookParams, Api.V1PatchWebhookResponse, void>(
-  Config.patchWebhook
-)
+export const patchWebhook = generateDetApi<
+  Service.PatchWebhookParams,
+  Api.V1PatchWebhookResponse,
+  void
+>(Config.patchWebhook);
 
 export const testWebhook = generateDetApi<
   Service.GetWebhookParams,

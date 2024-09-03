@@ -1,7 +1,7 @@
 import Form from 'hew/Form';
 import Input from 'hew/Input';
 import { Modal } from 'hew/Modal';
-import React, { useId, useCallback, useState } from 'react';
+import React, { useCallback, useId, useState } from 'react';
 
 import { paths } from 'routes/utils';
 import { patchWebhook } from 'services/api';
@@ -31,13 +31,13 @@ const WebhookEditModalComponent: React.FC<Props> = ({ onSuccess, webhook }: Prop
     setDisabled(hasError);
   }, [form]);
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     if (!webhook) return;
     const values = await form.validateFields();
     const url = values.url;
-    
+
     try {
-      await patchWebhook({ url: url, id: webhook.id });
+      await patchWebhook({ id: webhook.id, url: url });
       onSuccess?.();
       routeToReactUrl(paths.webhooks());
     } catch (e) {
@@ -49,7 +49,7 @@ const WebhookEditModalComponent: React.FC<Props> = ({ onSuccess, webhook }: Prop
         type: ErrorType.Server,
       });
     }
-  };
+  }, [form, onSuccess, webhook]);
 
   return (
     <Modal
@@ -63,7 +63,12 @@ const WebhookEditModalComponent: React.FC<Props> = ({ onSuccess, webhook }: Prop
         text: 'Save Changes',
       }}
       title="Edit Webhook">
-      <Form autoComplete="off" form={form} id={idPrefix + FORM_ID} layout="vertical" onFieldsChange={onChange}>
+      <Form
+        autoComplete="off"
+        form={form}
+        id={idPrefix + FORM_ID}
+        layout="vertical"
+        onFieldsChange={onChange}>
         <Form.Item
           label="URL"
           name="url"
@@ -71,12 +76,11 @@ const WebhookEditModalComponent: React.FC<Props> = ({ onSuccess, webhook }: Prop
             { message: 'URL is required.', required: true },
             { message: 'URL must be valid.', type: 'url', whitespace: true },
           ]}>
-            <Input />
+          <Input />
         </Form.Item>
       </Form>
     </Modal>
   );
 };
-  
+
 export default WebhookEditModalComponent;
-  

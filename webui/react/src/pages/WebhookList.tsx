@@ -48,8 +48,8 @@ import settingsConfig, { DEFAULT_COLUMN_WIDTHS, Settings } from './WebhookList.s
 const MenuKey = {
   CopyName: 'copy-name',
   DeleteWebhook: 'delete-webhook',
-  TestWebhook: 'test-webhook',
   EditWebhook: 'edit-webhook',
+  TestWebhook: 'test-webhook',
 } as const;
 
 const WebhooksView: React.FC = () => {
@@ -145,11 +145,12 @@ const WebhooksView: React.FC = () => {
           }
           break;
         case MenuKey.EditWebhook:
+          setSelectedWebhook(record);
           WebhookEditModal.open();
           break;
       }
     },
-    [WebhookDeleteModal, openToast],
+    [WebhookDeleteModal, WebhookEditModal, openToast],
   );
 
   const handleWorkspaceFilterApply = useCallback(

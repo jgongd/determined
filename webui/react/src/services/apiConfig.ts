@@ -1303,7 +1303,7 @@ export const testWebhook: DetApi<Service.GetWebhookParams, Api.V1TestWebhookResp
 export const patchWebhook: DetApi<Service.PatchWebhookParams, Api.V1PatchWebhookResponse, void> = {
   name: 'patchWebhook',
   postProcess: noOp,
-  request: (params) => detApi.Webhooks.patchWebhook(params.id, {url: params.url}),
+  request: (params) => detApi.Webhooks.patchWebhook(params.id, { url: params.url }),
 };
 
 /* Models */
