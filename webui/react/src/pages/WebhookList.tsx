@@ -26,6 +26,7 @@ import {
 import TableFilterDropdown from 'components/Table/TableFilterDropdown';
 import WebhookCreateModalComponent from 'components/WebhookCreateModal';
 import WebhookDeleteModalComponent from 'components/WebhookDeleteModal';
+import WebhookEditModalComponent from 'components/WebhookEditModal';
 import WorkspaceFilter from 'components/WorkspaceFilter';
 import useFeature from 'hooks/useFeature';
 import usePermissions from 'hooks/usePermissions';
@@ -48,6 +49,7 @@ const MenuKey = {
   CopyName: 'copy-name',
   DeleteWebhook: 'delete-webhook',
   TestWebhook: 'test-webhook',
+  EditWebhook: 'edit-webhook',
 } as const;
 
 const WebhooksView: React.FC = () => {
@@ -66,6 +68,7 @@ const WebhooksView: React.FC = () => {
 
   const WebhookCreateModal = useModal(WebhookCreateModalComponent);
   const WebhookDeleteModal = useModal(WebhookDeleteModalComponent);
+  const WebhookEditModal = useModal(WebhookEditModalComponent);
 
   const { settings, updateSettings } = useSettings<Settings>(settingsConfig);
 
@@ -141,6 +144,9 @@ const WebhooksView: React.FC = () => {
             });
           }
           break;
+        case MenuKey.EditWebhook:
+          WebhookEditModal.open();
+          break;
       }
     },
     [WebhookDeleteModal, openToast],
@@ -182,6 +188,7 @@ const WebhooksView: React.FC = () => {
       canEditWebhooks(workspaces, record) &&
         DROPDOWN_MENU.push(
           { key: MenuKey.TestWebhook, label: 'Test Webhook' },
+          { key: MenuKey.EditWebhook, label: 'Edit Webhook' },
           { danger: true, key: MenuKey.DeleteWebhook, label: 'Delete Webhook' },
         );
       return DROPDOWN_MENU;
@@ -368,6 +375,7 @@ const WebhooksView: React.FC = () => {
       )}
       <WebhookCreateModal.Component onSuccess={() => fetchWebhooks()} />
       <WebhookDeleteModal.Component webhook={selectedWebhook} onSuccess={() => fetchWebhooks()} />
+      <WebhookEditModal.Component webhook={selectedWebhook} onSuccess={() => fetchWebhooks()} />
     </Page>
   );
 };

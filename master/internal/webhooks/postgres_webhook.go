@@ -23,6 +23,7 @@ import (
 	"github.com/determined-ai/determined/master/pkg/ptrs"
 	"github.com/determined-ai/determined/master/pkg/schemas"
 	"github.com/determined-ai/determined/master/pkg/schemas/expconf"
+	"github.com/determined-ai/determined/proto/pkg/webhookv1"
 
 	"github.com/google/uuid"
 )
@@ -722,4 +723,26 @@ WHERE q.id = webhook_events_queue.id RETURNING webhook_events_queue.*
 		return nil, fmt.Errorf("scanning events: %w", err)
 	}
 	return &eventBatch{tx: &tx, events: events}, nil
+}
+
+// updateWebhook updates a webhook in the database.
+func (l *WebhookManager) updateWebhook(
+	ctx context.Context,
+	webhookID int32,
+	p *webhookv1.PatchWebhook,
+) error {
+	err := db.Bun().RunInTx(ctx, nil, func(ctx context.Context, tx bun.Tx) error {
+		_, err := tx.NewUpdate().Table("webhooks").
+			Set("url = ?", p.Url).
+			Where("id = ?", webhookID).
+			Exec(ctx)
+		if err != nil {
+			return fmt.Errorf("error updating webhook %s: %w", webhookID, err)
+		}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+	return nil
 }

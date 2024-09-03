@@ -2343,6 +2343,16 @@ service Determined {
     };
   }
 
+  // Update a webhook.
+  rpc PatchWebhook(PatchWebhookRequest) returns (PatchWebhookResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/webhooks/{id}"
+    };
+    option (grpc.gateway.protoc_gen_swagger.options.openapiv2_operation) = {
+      tags: "Webhooks"
+    };
+  }
+
   // Create a webhook.
   // TODO(???): Simplify req/response structs?
   rpc PostWebhook(PostWebhookRequest) returns (PostWebhookResponse) {
