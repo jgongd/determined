@@ -22681,25 +22681,23 @@ def patch_PatchUsers(
         return v1PatchUsersResponse.from_json(_resp.json())
     raise APIHttpError("patch_PatchUsers", _resp)
 
-def get_PatchWebhook(
+def patch_PatchWebhook(
     session: "api.BaseSession",
     *,
+    body: "v1PatchWebhook",
     id: int,
-    webhook_url: "typing.Optional[str]" = None,
 ) -> "v1PatchWebhookResponse":
     """Update a webhook.
 
+    - body: The desired webhook fields and values to update.
     - id: The id of the webhook.
-    - webhook_url: The new url of the webhook.
     """
-    _params = {
-        "webhook.url": webhook_url,
-    }
+    _params = None
     _resp = session._do_request(
-        method="GET",
+        method="PATCH",
         path=f"/api/v1/webhooks/{id}",
         params=_params,
-        json=None,
+        json=body.to_json(True),
         data=None,
         headers=None,
         timeout=None,
@@ -22707,7 +22705,7 @@ def get_PatchWebhook(
     )
     if _resp.status_code == 200:
         return v1PatchWebhookResponse.from_json(_resp.json())
-    raise APIHttpError("get_PatchWebhook", _resp)
+    raise APIHttpError("patch_PatchWebhook", _resp)
 
 def patch_PatchWorkspace(
     session: "api.BaseSession",

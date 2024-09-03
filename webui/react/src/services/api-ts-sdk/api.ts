@@ -34886,19 +34886,23 @@ export const WebhooksApiFetchParamCreator = function (configuration?: Configurat
          * 
          * @summary Update a webhook.
          * @param {number} id The id of the webhook.
-         * @param {string} [webhookUrl] The new url of the webhook.
+         * @param {V1PatchWebhook} body The desired webhook fields and values to update.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        patchWebhook(id: number, webhookUrl?: string, options: any = {}): FetchArgs {
+        patchWebhook(id: number, body: V1PatchWebhook, options: any = {}): FetchArgs {
             // verify required parameter 'id' is not null or undefined
             if (id === null || id === undefined) {
                 throw new RequiredError('id','Required parameter id was null or undefined when calling patchWebhook.');
             }
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling patchWebhook.');
+            }
             const localVarPath = `/api/v1/webhooks/{id}`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             const localVarUrlObj = new URL(localVarPath, BASE_PATH);
-            const localVarRequestOptions = { method: 'GET', ...options };
+            const localVarRequestOptions = { method: 'PATCH', ...options };
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
             
@@ -34910,13 +34914,12 @@ export const WebhooksApiFetchParamCreator = function (configuration?: Configurat
                 localVarHeaderParameter["Authorization"] = localVarApiKeyValue;
             }
             
-            if (webhookUrl !== undefined) {
-                localVarQueryParameter['webhook.url'] = webhookUrl
-            }
+            localVarHeaderParameter['Content-Type'] = 'application/json';
             
             objToSearchParams(localVarQueryParameter, localVarUrlObj.searchParams);
             objToSearchParams(options.query || {}, localVarUrlObj.searchParams);
             localVarRequestOptions.headers = { ...localVarHeaderParameter, ...options.headers };
+            localVarRequestOptions.body = JSON.stringify(body)
             
             return {
                 url: `${localVarUrlObj.pathname}${localVarUrlObj.search}`,
@@ -35047,12 +35050,12 @@ export const WebhooksApiFp = function (configuration?: Configuration) {
          * 
          * @summary Update a webhook.
          * @param {number} id The id of the webhook.
-         * @param {string} [webhookUrl] The new url of the webhook.
+         * @param {V1PatchWebhook} body The desired webhook fields and values to update.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        patchWebhook(id: number, webhookUrl?: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<V1PatchWebhookResponse> {
-            const localVarFetchArgs = WebhooksApiFetchParamCreator(configuration).patchWebhook(id, webhookUrl, options);
+        patchWebhook(id: number, body: V1PatchWebhook, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<V1PatchWebhookResponse> {
+            const localVarFetchArgs = WebhooksApiFetchParamCreator(configuration).patchWebhook(id, body, options);
             return (fetch: FetchAPI = window.fetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -35133,12 +35136,12 @@ export const WebhooksApiFactory = function (configuration?: Configuration, fetch
          * 
          * @summary Update a webhook.
          * @param {number} id The id of the webhook.
-         * @param {string} [webhookUrl] The new url of the webhook.
+         * @param {V1PatchWebhook} body The desired webhook fields and values to update.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        patchWebhook(id: number, webhookUrl?: string, options?: any) {
-            return WebhooksApiFp(configuration).patchWebhook(id, webhookUrl, options)(fetch, basePath);
+        patchWebhook(id: number, body: V1PatchWebhook, options?: any) {
+            return WebhooksApiFp(configuration).patchWebhook(id, body, options)(fetch, basePath);
         },
         /**
          * 
@@ -35197,13 +35200,13 @@ export class WebhooksApi extends BaseAPI {
      * 
      * @summary Update a webhook.
      * @param {number} id The id of the webhook.
-     * @param {string} [webhookUrl] The new url of the webhook.
+     * @param {V1PatchWebhook} body The desired webhook fields and values to update.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof WebhooksApi
      */
-    public patchWebhook(id: number, webhookUrl?: string, options?: any) {
-        return WebhooksApiFp(this.configuration).patchWebhook(id, webhookUrl, options)(this.fetch, this.basePath)
+    public patchWebhook(id: number, body: V1PatchWebhook, options?: any) {
+        return WebhooksApiFp(this.configuration).patchWebhook(id, body, options)(this.fetch, this.basePath)
     }
     
     /**

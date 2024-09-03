@@ -737,7 +737,7 @@ func (l *WebhookManager) updateWebhook(
 			Where("id = ?", webhookID).
 			Exec(ctx)
 		if err != nil {
-			return fmt.Errorf("error updating webhook %s: %w", webhookID, err)
+			return fmt.Errorf("error updating webhook %d: %w", webhookID, err)
 		}
 		return nil
 	})

@@ -2346,7 +2346,8 @@ service Determined {
   // Update a webhook.
   rpc PatchWebhook(PatchWebhookRequest) returns (PatchWebhookResponse) {
     option (google.api.http) = {
-      get: "/api/v1/webhooks/{id}"
+      patch: "/api/v1/webhooks/{id}"
+      body: "webhook"
     };
     option (grpc.gateway.protoc_gen_swagger.options.openapiv2_operation) = {
       tags: "Webhooks"

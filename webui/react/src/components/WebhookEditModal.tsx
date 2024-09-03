@@ -1,11 +1,13 @@
 import Form from 'hew/Form';
 import Input from 'hew/Input';
 import { Modal } from 'hew/Modal';
-import React, { useId } from 'react';
+import React, { useId, useCallback, useState } from 'react';
 
+import { paths } from 'routes/utils';
 import { patchWebhook } from 'services/api';
 import { Webhook } from 'types';
 import handleError, { ErrorLevel, ErrorType } from 'utils/error';
+import { routeToReactUrl } from 'utils/routes';
 
 const FORM_ID = 'edit-webhook-form';
 
@@ -21,6 +23,13 @@ interface Props {
 const WebhookEditModalComponent: React.FC<Props> = ({ onSuccess, webhook }: Props) => {
   const idPrefix = useId();
   const [form] = Form.useForm<FormInputs>();
+  const [disabled, setDisabled] = useState<boolean>(true);
+
+  const onChange = useCallback(() => {
+    const fields = form.getFieldsError();
+    const hasError = fields.some((f) => f.errors.length);
+    setDisabled(hasError);
+  }, [form]);
 
   const handleSubmit = async () => {
     if (!webhook) return;
@@ -28,8 +37,9 @@ const WebhookEditModalComponent: React.FC<Props> = ({ onSuccess, webhook }: Prop
     const url = values.url;
     
     try {
-      await patchWebhook({ url, id: webhook.id });
+      await patchWebhook({ url: url, id: webhook.id });
       onSuccess?.();
+      routeToReactUrl(paths.webhooks());
     } catch (e) {
       handleError(e, {
         level: ErrorLevel.Error,
@@ -46,13 +56,14 @@ const WebhookEditModalComponent: React.FC<Props> = ({ onSuccess, webhook }: Prop
       cancel
       size="small"
       submit={{
+        disabled,
         form: idPrefix + FORM_ID,
         handleError,
         handler: handleSubmit,
         text: 'Save Changes',
       }}
       title="Edit Webhook">
-      <Form autoComplete="off" form={form} id={idPrefix + FORM_ID} layout="vertical">
+      <Form autoComplete="off" form={form} id={idPrefix + FORM_ID} layout="vertical" onFieldsChange={onChange}>
         <Form.Item
           label="URL"
           name="url"
