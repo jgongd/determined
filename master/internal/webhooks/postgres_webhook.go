@@ -751,15 +751,6 @@ func (l *WebhookManager) updateWebhook(
 	webhookID int32,
 	p *webhookv1.PatchWebhook,
 ) error {
-	fmt.Printf("\n before cache expToWebhookConfig: %#v\n", l.expToWebhookConfig)
-	fmt.Printf("before cache regexToTriggers: %#v\n", l.regexToTriggers)
-	for k, v := range l.regexToTriggers {
-		fmt.Printf("key: %v\n", k)
-		for k2, v2 := range v.triggerIDToTrigger {
-			fmt.Printf("  triggerid: %#v, webhook: %#v\n", k2, v2.Webhook)
-		}
-	}
-
 	var ts []*Trigger
 	err := db.Bun().NewSelect().Model(&ts).Relation("Webhook").
 		Where("webhook_id = ?", webhookID).
@@ -785,13 +776,6 @@ func (l *WebhookManager) updateWebhook(
 	if err != nil {
 		return fmt.Errorf("updating webhook: %w", err)
 	}
-	fmt.Printf("\n after cache expToWebhookConfig: %#v\n", l.expToWebhookConfig)
-	fmt.Printf("after cache regexToTriggers: %#v\n", l.regexToTriggers)
-	for k, v := range l.regexToTriggers {
-		fmt.Printf("key: %v\n", k)
-		for k2, v2 := range v.triggerIDToTrigger {
-			fmt.Printf("  triggerid: %#v, webhook: %#v\n", k2, v2.Webhook)
-		}
-	}
+
 	return nil
 }
