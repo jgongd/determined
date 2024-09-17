@@ -25,7 +25,6 @@
     },
     "additionalProperties": false,
     "eventuallyRequired": [
-        "type"
     ],
     "properties": {
         "type": true

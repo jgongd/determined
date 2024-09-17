@@ -40,7 +40,8 @@ func (b LogPoliciesConfigV0) Merge(
 type LogPolicyV0 struct {
 	RawPattern string `json:"pattern"`
 
-	RawAction LogActionV0 `json:"action"`
+	RawAction *LogActionV0 `json:"action"`
+	RawSignal *LogSignalV0 `json:"signal"`
 }
 
 // LogActionV0 is a policy to take after matching.
@@ -49,6 +50,13 @@ type LogPolicyV0 struct {
 type LogActionV0 struct {
 	RawCancelRetries *LogActionCancelRetriesV0 `union:"type,cancel_retries" json:"-"`
 	RawExcludeNode   *LogActionExcludeNodeV0   `union:"type,exclude_node" json:"-"`
+}
+
+// LogSignalV0 is an signal to show if we match against trial logs.
+//
+//go:generate ../gen.sh
+type LogSignalV0 struct {
+	RawLabel string `json:"label"`
 }
 
 // Merge implements schemas.Mergeable.

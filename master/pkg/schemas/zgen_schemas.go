@@ -1557,7 +1557,6 @@ var (
     },
     "additionalProperties": false,
     "eventuallyRequired": [
-        "type"
     ],
     "properties": {
         "type": true
@@ -1570,8 +1569,7 @@ var (
     "title": "LogPolicy",
     "additionalProperties": false,
     "required": [
-        "pattern",
-        "action"
+        "pattern"
     ],
     "type": "object",
     "properties": {
@@ -1582,9 +1580,35 @@ var (
         },
         "action": {
             "type": [
+                "object",
+                "null"
+            ],
+            "$ref": "http://determined.ai/schemas/expconf/v0/log-action.json",
+            "default": null
+        },
+        "signal": {
+            "type": [
                 "object"
             ],
-            "$ref": "http://determined.ai/schemas/expconf/v0/log-action.json"
+            "$ref": "http://determined.ai/schemas/expconf/v0/log-signal.json"
+        }
+    }
+}
+`)
+	textLogSignalV0 = []byte(`{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "http://determined.ai/schemas/expconf/v0/log-signal.json",
+    "title": "LogSignal",
+    "additionalProperties": false,
+    "required": [
+        "label"
+    ],
+    "type": "object",
+    "properties": {
+        "label": {
+            "type": [
+                "string"
+            ]
         }
     }
 }
@@ -3462,6 +3486,8 @@ var (
 
 	schemaLogPolicyV0 interface{}
 
+	schemaLogSignalV0 interface{}
+
 	schemaOptimizationsConfigV0 interface{}
 
 	schemaPachydermDatasetConfigV0 interface{}
@@ -4173,6 +4199,26 @@ func ParsedLogPolicyV0() interface{} {
 		panic("invalid embedded json for LogPolicyV0")
 	}
 	return schemaLogPolicyV0
+}
+
+func ParsedLogSignalV0() interface{} {
+	cacheLock.RLock()
+	if schemaLogSignalV0 != nil {
+		cacheLock.RUnlock()
+		return schemaLogSignalV0
+	}
+	cacheLock.RUnlock()
+
+	cacheLock.Lock()
+	defer cacheLock.Unlock()
+	if schemaLogSignalV0 != nil {
+		return schemaLogSignalV0
+	}
+	err := json.Unmarshal(textLogSignalV0, &schemaLogSignalV0)
+	if err != nil {
+		panic("invalid embedded json for LogSignalV0")
+	}
+	return schemaLogSignalV0
 }
 
 func ParsedOptimizationsConfigV0() interface{} {
@@ -4914,6 +4960,8 @@ func schemaBytesMap() map[string][]byte {
 	cachedSchemaBytesMap[url] = textLogActionV0
 	url = "http://determined.ai/schemas/expconf/v0/log-policy.json"
 	cachedSchemaBytesMap[url] = textLogPolicyV0
+	url = "http://determined.ai/schemas/expconf/v0/log-signal.json"
+	cachedSchemaBytesMap[url] = textLogSignalV0
 	url = "http://determined.ai/schemas/expconf/v0/optimizations.json"
 	cachedSchemaBytesMap[url] = textOptimizationsConfigV0
 	url = "http://determined.ai/schemas/expconf/v0/pachyderm-dataset.json"
