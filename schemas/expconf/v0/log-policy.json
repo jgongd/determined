@@ -23,9 +23,8 @@
         },
         "signal": {
             "type": [
-                "object"
-            ],
-            "$ref": "http://determined.ai/schemas/expconf/v0/log-signal.json"
+                "string"
+            ]
         }
     }
 }

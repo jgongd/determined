@@ -1,2 +1,2 @@
-ALTER table public.runs
-    ADD COLUMN log_signal_label text;
+ALTER table public.tasks
+    ADD COLUMN log_signal text;

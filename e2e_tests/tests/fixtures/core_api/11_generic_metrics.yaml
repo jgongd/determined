@@ -9,5 +9,4 @@ searcher:
 max_restarts: 0
 log_policies:
   - pattern: ".*complete.*"
-    signal:
-      label: "complete"
+    signal: "complete"

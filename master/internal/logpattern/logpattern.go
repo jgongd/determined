@@ -98,15 +98,12 @@ func (l *LogPatternPolicies) monitor(ctx context.Context,
 				}
 
 				if policy.Signal() != nil {
-					label := policy.Signal().Label()
-					err = db.Bun().RunInTx(ctx, nil, func(ctx context.Context, tx bun.Tx) error {
+					signal := policy.Signal()
 
-						if _, err := tx.NewRaw(`UPDATE runs SET log_signal_label = ?
-							FROM run_id_task_id
-							JOIN runs
-								ON run_id_task_id.run_id = runs.id
-							WHERE run_id_task_id.task_id = ?`,
-							label, log.TaskID).Exec(ctx); err != nil {
+					err = db.Bun().RunInTx(ctx, nil, func(ctx context.Context, tx bun.Tx) error {
+						if _, err := tx.NewRaw(`UPDATE tasks SET log_signal = ?
+							WHERE task_id = ?`,
+							signal, log.TaskID).Exec(ctx); err != nil {
 							return fmt.Errorf("completing task: %w", err)
 						}
 

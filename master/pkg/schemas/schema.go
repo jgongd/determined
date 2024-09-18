@@ -48,7 +48,6 @@ func IsComplete(schema Schema) error {
 
 	validator := schema.CompletenessValidator()
 	err = validator.Validate(bytes.NewReader(byts))
-	fmt.Printf("\n\nschema: %#v\n", schema)
 	if err != nil {
 		err = errors.New(JoinErrors(GetRenderedErrors(err, byts), "\n"))
 		return errors.Wrap(err, "config is invalid or incomplete")

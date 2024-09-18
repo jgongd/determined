@@ -24,11 +24,11 @@ func (l *LogPolicyV0) SetAction(val *LogActionV0) {
 	l.RawAction = val
 }
 
-func (l LogPolicyV0) Signal() *LogSignalV0 {
+func (l LogPolicyV0) Signal() *string {
 	return l.RawSignal
 }
 
-func (l *LogPolicyV0) SetSignal(val *LogSignalV0) {
+func (l *LogPolicyV0) SetSignal(val *string) {
 	l.RawSignal = val
 }
 
