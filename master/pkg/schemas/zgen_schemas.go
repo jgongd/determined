@@ -1569,7 +1569,6 @@ var (
     "title": "LogPolicy",
     "additionalProperties": false,
     "required": [
-        "pattern"
     ],
     "type": "object",
     "properties": {

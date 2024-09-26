@@ -101,16 +101,25 @@ func (l *LogPatternPolicies) monitor(ctx context.Context,
 					signal := policy.Signal()
 
 					err = db.Bun().RunInTx(ctx, nil, func(ctx context.Context, tx bun.Tx) error {
-						if _, err := tx.NewRaw(`UPDATE tasks SET log_signal = ?
-							WHERE task_id = ?`,
-							signal, log.TaskID).Exec(ctx); err != nil {
-							return fmt.Errorf("completing task: %w", err)
+						if _, err := tx.NewUpdate().Model(&model.Task{}).
+							Set("log_signal = ?", signal).
+							Where("task_id = ?", log.TaskID).
+							Exec(ctx); err != nil {
+							return fmt.Errorf("updating log signal of task %s: %w", log.TaskID, err)
+						}
+						if _, err := tx.NewUpdate().Model(&model.Run{}).
+							Table("run_id_task_id").
+							Set("log_signal = ?", signal).
+							Where("run.id = run_id_task_id.run_id").
+							Where("run_id_task_id.task_id = ?", log.TaskID).
+							Exec(ctx); err != nil {
+							return fmt.Errorf("updating log signal of task %s: %w", log.TaskID, err)
 						}
 
 						return nil
 					})
 					if err != nil {
-						return fmt.Errorf("updating webhook: %w", err)
+						return fmt.Errorf("updating log signal: %w", err)
 					}
 				}
 			}
@@ -249,4 +258,31 @@ func TaskLogsFromDontRetryTriggers(taskID model.TaskID, t []DontRetryTrigger) []
 	}
 
 	return taskLogs
+}
+
+// ClearSignal resets the log_signal.
+func ClearSignal(ctx context.Context, taskID model.TaskID) error {
+	if err := db.Bun().RunInTx(ctx, nil, func(ctx context.Context, tx bun.Tx) error {
+		if _, err := tx.NewUpdate().Model(&model.Task{}).
+			Set("log_signal = null").
+			Where("task_id = ?", taskID).
+			Exec(ctx); err != nil {
+			return fmt.Errorf("resetting log signal of task %s: %w", taskID, err)
+		}
+		if _, err := tx.NewUpdate().Model(&model.Run{}).
+			Table("run_id_task_id").
+			Set("log_signal = null").
+			Where("run.id = run_id_task_id.run_id").
+			Where("run_id_task_id.task_id = ?", taskID).
+			Exec(ctx); err != nil {
+			return fmt.Errorf("resetting log signal of task %s: %w", taskID, err)
+		}
+
+		return nil
+	}); err != nil {
+		return fmt.Errorf("resetting log signal: %w", err)
+	}
+
+	// TODO run
+	return nil
 }

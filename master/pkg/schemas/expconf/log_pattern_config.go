@@ -13,13 +13,29 @@ import (
 // LogPoliciesConfigV0 is a list of log policies.
 type LogPoliciesConfigV0 []LogPolicyV0
 
+// WithDefaults implements the Defaultable psuedointerface.
+func (l *LogPoliciesConfigV0) WithDefaults() *LogPoliciesConfigV0 {
+	eccErrorPattern := ECCErrorPattern
+	eccErrorSignal := ECCErrorSignal
+	cudaOomPattern := CUDAOOMPattern
+	cudaOomSignal := CUDAOOMSignal
+	fmt.Printf("\n\n logpolicyconfig: %#v \n\n", l)
+	if l != nil && len(*l) == 0 {
+		return &LogPoliciesConfigV0{
+			LogPolicyV0{RawPattern: eccErrorPattern, RawSignal: &eccErrorSignal},
+			LogPolicyV0{RawPattern: cudaOomPattern, RawSignal: &cudaOomSignal},
+		}
+	}
+	return l
+}
+
 // Merge implemenets the mergable interface.
-func (b LogPoliciesConfigV0) Merge(
-	other LogPoliciesConfigV0,
-) LogPoliciesConfigV0 {
+func (b *LogPoliciesConfigV0) Merge(
+	other *LogPoliciesConfigV0,
+) *LogPoliciesConfigV0 {
 	var out LogPoliciesConfigV0
 	seen := make(map[string]bool)
-	for _, p := range append(other, b...) {
+	for _, p := range append(*other, *b...) {
 		json, err := json.Marshal(p)
 		if err != nil {
 			log.Errorf("marshaling error %+v %v", p, err)
@@ -31,7 +47,7 @@ func (b LogPoliciesConfigV0) Merge(
 
 		out = append(out, p)
 	}
-	return out
+	return &out
 }
 
 // LogPolicyV0 is an action to take if we match against trial logs.

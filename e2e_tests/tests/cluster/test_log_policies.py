@@ -7,6 +7,8 @@ from determined.common.api import bindings
 from tests import api_utils
 from tests import config as conf
 from tests import experiment as exp
+from tests import detproc
+from tests.cluster import utils
 
 
 @pytest.mark.e2e_cpu
@@ -205,3 +207,99 @@ def test_log_policy_exclude_slurm(should_match: bool) -> None:
         )  # Job fails to start up the second restart since all nodes are excluded.
     else:
         assert times_ran == 2
+
+
+@pytest.mark.e2e_cpu
+@pytest.mark.parametrize("should_match", [True, False])
+def test_log_signal(should_match: bool) -> None:
+    sess = api_utils.user_session()
+    regex = r"assert not self\.crash_on_startup"
+    if not should_match:
+        regex = r"(.*) this should not match (.*)"
+
+    expected_signal = "Test Signal"
+    config = conf.load_config(conf.fixtures_path("no_op/single-medium-train-step.yaml"))
+    config["log_policies"] = [
+        {
+            "pattern": regex,
+            "signal": expected_signal,
+        },
+    ]
+    config["hyperparameters"]["crash_on_startup"] = True
+    config["max_restarts"] = 1
+
+    with tempfile.NamedTemporaryFile() as tf:
+        with open(tf.name, "w") as f:
+            yaml.dump(config, f)
+        exp_id = exp.create_experiment(sess, tf.name, conf.fixtures_path("no_op"))
+
+    exp.wait_for_experiment_state(sess, exp_id, bindings.experimentv1State.ERROR)
+
+    searchRes = utils.get_run_by_exp_id(sess, exp_id)
+    runSignal = searchRes.runs[0].logSignal
+
+    trialRes = bindings.get_GetTrial(
+        sess,
+        trialId = searchRes.runs[0].id
+    )
+    trialSignal = trialRes.trial.logSignal
+
+
+    if should_match:
+        assert runSignal == expected_signal
+        assert trialSignal == expected_signal
+    else:
+        assert runSignal is None
+        assert trialSignal is None
+
+@pytest.mark.e2e_cpu
+def test_signal_clear_after_exp_continue() -> None:
+    sess = api_utils.user_session()
+
+    regex = r"assert not self\.crash_on_startup"
+    expected_signal = "Test Signal"
+    config = conf.load_config(conf.fixtures_path("no_op/single-medium-train-step.yaml"))
+    config["log_policies"] = [
+        {
+            "pattern": regex,
+            "signal": expected_signal,
+        },
+    ]
+    config["hyperparameters"]["crash_on_startup"] = True
+    config["max_restarts"] = 0
+
+    with tempfile.NamedTemporaryFile() as tf:
+        with open(tf.name, "w") as f:
+            yaml.dump(config, f)
+        exp_id = exp.create_experiment(sess, tf.name, conf.fixtures_path("no_op"))
+
+    exp.wait_for_experiment_state(sess, exp_id, bindings.experimentv1State.ERROR)
+
+
+    searchRes = utils.get_run_by_exp_id(sess, exp_id)
+    runSignal = searchRes.runs[0].logSignal
+
+    trialRes = bindings.get_GetTrial(
+        sess,
+        trialId = searchRes.runs[0].id
+    )
+    trialSignal = trialRes.trial.logSignal
+
+    assert runSignal == expected_signal
+    assert trialSignal == expected_signal
+
+
+    detproc.check_call(sess, ["det", "e", "continue", str(exp_id), "--config", "hyperparameters.crash_on_startup=false"])
+    exp.wait_for_experiment_state(sess, exp_id, bindings.experimentv1State.COMPLETED)
+
+    searchRes = utils.get_run_by_exp_id(sess, exp_id)
+    runSignal = searchRes.runs[0].logSignal
+
+    trialRes = bindings.get_GetTrial(
+        sess,
+        trialId = searchRes.runs[0].id
+    )
+    trialSignal = trialRes.trial.logSignal
+
+    assert runSignal == None
+    assert trialSignal == None

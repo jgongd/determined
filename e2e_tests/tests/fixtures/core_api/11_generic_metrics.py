@@ -36,5 +36,6 @@ def main(core_context: det.core.Context, increment_by: float):
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG, format=det.LOG_FORMAT)
+    raise("fail")
     with det.core.init() as core_context:
         main(core_context=core_context, increment_by=1)
