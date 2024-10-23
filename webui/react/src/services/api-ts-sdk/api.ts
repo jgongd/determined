@@ -934,11 +934,11 @@ export interface Trialv1Trial {
      */
     metadata?: any;
     /**
-     * The log signals.
+     * Log Policy Matched.
      * @type {string}
      * @memberof Trialv1Trial
      */
-    logSignal?: string;
+    logPolicyMatched?: string;
 }
 /**
  * 
@@ -3706,11 +3706,11 @@ export interface V1FlatRun {
      */
     localId?: string;
     /**
-     * Log signal.
+     * Log policy matched.
      * @type {string}
      * @memberof V1FlatRun
      */
-    logSignal?: string;
+    logPolicyMatched?: string;
 }
 /**
  * 
