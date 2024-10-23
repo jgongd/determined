@@ -32,14 +32,14 @@ const TrialHeaderLeft: React.FC<Props> = ({ experiment, trial }: Props) => {
       <div className={css.trial}>
         <ExperimentIcons state={trial.state} />
         <div>Trial {trial.id}</div>
-        {trial.logSignal &&
-          (trial.logSignal.length < labelMaxLength ? (
-            <Badge backgroundColor={hex2hsl(labelColor)} text={trial.logSignal} />
+        {trial.logPolicyMatched &&
+          (trial.logPolicyMatched.length < labelMaxLength ? (
+            <Badge backgroundColor={hex2hsl(labelColor)} text={trial.logPolicyMatched} />
           ) : (
-            <Tooltip content={trial.logSignal}>
+            <Tooltip content={trial.logPolicyMatched}>
               <Badge
                 backgroundColor={hex2hsl(labelColor)}
-                text={`${trial.logSignal.slice(0, labelMaxLength)}...`}
+                text={`${trial.logPolicyMatched.slice(0, labelMaxLength)}...`}
               />
             </Tooltip>
           ))}
